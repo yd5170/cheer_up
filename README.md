@@ -63,11 +63,18 @@
 
 > 복합표본 가중치 반영 + Rao-Scott 카이제곱 검정 기반 결과
 
-```
-📱 스마트폰 의존 위험군의 구강 증상 발생률 → 일반군 대비 약 1.43배 증가 확인 (p < 0.001)
-😴 수면 부족 집단(수면 질 불량)에서 구강 질환 증상 비율이 53.89%로 증가 확인 (p < 0.001)
-⚠️ 스마트폰 의존 + 수면 부족 이중 해당군 → 구강 증상 발생률 59.43%로 대조군(약 37.0%) 대비 1.61배 폭증
-```
+<div align="center">
+  <img src="./images/01_smartphone_dependence_vs_oral.png" width="48%" alt="스마트폰 의존도별 구강증상 발생률" />
+  <img src="./images/02_sleep_quality_vs_oral.png" width="48%" alt="수면의 질별 구강증상 발생률" />
+  <br>
+  <img src="./images/03_use_time_vs_oral.png" width="96%" alt="사용시간별 구강증상 비율" />
+</div>
+
+<br>
+
+- 📱 스마트폰 의존 위험군의 구강 증상 발생률 → 일반군 대비 약 1.43배 증가 확인 (p < 0.001)
+- 😴 수면 부족 집단(수면 질 불량)에서 구강 질환 증상 비율이 53.89%로 증가 확인 (p < 0.001)
+- ⚠️ 스마트폰 의존 + 수면 부족 이중 해당군 → 구강 증상 발생률 59.43%로 대조군(약 37.0%) 대비 1.61배 폭증
 
 > 📌 **단순 상관이 아닌 복합표본 가중치를 반영한 통계 검정으로 모집단 수준에서 검증**
 
@@ -124,6 +131,19 @@
         ▼
 🌐 서비스 배포          Streamlit 실시간 예측 · 맞춤 가이드 · 치과 연계
 ```
+
+---
+
+## 📈 모델 성능 및 변수 중요도 시각화
+
+> Youden's Index 기반 임계값 최적화 및 SHAP 분석 결과 시각화
+
+<div align="center">
+  <img src="./images/04_model_performance_compare.png" width="48%" alt="머신러닝 모델 성능 비교" />
+  <img src="./images/05_roc_curves.png" width="48%" alt="ROC 커브 비교" />
+  <br>
+  <img src="./images/06_feature_importance.png" width="96%" alt="XGBoost 변수 중요도" />
+</div>
 
 ---
 
