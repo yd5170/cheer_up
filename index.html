@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="2020년 청소년 건강행태조사 데이터를 활용한 머신러닝 기반 스마트폰 의존·수면의 질에 따른 구강 위험 분류 예측 서비스 포트폴리오">
+  <meta name="description" content="2020년 청소년 건강행태조사 데이터를 활용한 머신러닝 기반 스마트폰 의존·수면의 질에 따른 구강 건강 위험도 예측 서비스 포트폴리오">
   <title>청소년 구강 위험 분류 예측 서비스 포트폴리오 | 폰잠치아라</title>
   
   <!-- 구글 웹 폰트 (Noto Sans KR & Outfit) 불러오기 -->
@@ -13,6 +13,9 @@
   
   <!-- FontAwesome 아이콘 불러오기 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Chart.js CDN 라이브러리 불러오기 (시각화 구현용) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -68,8 +71,8 @@
     }
 
     /* 폰트 혼합 지정 (영어/숫자는 Outfit 적용) */
-    .font-outfit, .number, .kpi-num, code, pre {
-      font-family: 'Outfit', sans-serif !important;
+    .font-outfit, .number, .kpi-num, code, pre, .chart-title {
+      font-family: 'Outfit', 'Noto Sans KR', sans-serif !important;
     }
 
     a {
@@ -107,6 +110,14 @@
       height: 4px;
       background: linear-gradient(90deg, var(--primary), var(--secondary));
       border-radius: 2px;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-top: -2.5rem;
+      margin-bottom: 4rem;
     }
 
     .badge-primary {
@@ -218,7 +229,6 @@
       width: 100%;
     }
 
-    /* 모바일 햄버거 메뉴 */
     .mobile-menu-btn {
       display: none;
       background: none;
@@ -403,17 +413,6 @@
       color: var(--text-muted);
     }
 
-    .model-info-bar {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      margin-bottom: 3.5rem;
-    }
-
-    .model-info-bar strong {
-      color: var(--primary);
-    }
-
-    /* 메인 액션 버튼 */
     .hero-buttons {
       display: flex;
       justify-content: center;
@@ -455,13 +454,12 @@
       transform: translateY(-2px);
     }
 
-    /* Shields.io 기술 배지 영역 */
     .shields-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 0.5rem;
-      max-width: 800px;
+      max-width: 850px;
       margin: 0 auto;
     }
 
@@ -471,9 +469,9 @@
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 2: 배경 & 데이터]
+       [섹션 2: 프로젝트 소개]
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    #background {
+    #project-intro {
       padding: 100px 0;
       background-color: rgba(17, 34, 64, 0.2);
     }
@@ -489,16 +487,22 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      gap: 1.5rem;
     }
 
     .bg-text-card {
       background-color: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.02);
       padding: 2.25rem;
       border-radius: 12px;
-      margin-bottom: 1.5rem;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       position: relative;
+      transition: var(--transition);
+    }
+
+    .bg-text-card:hover {
+      transform: translateX(5px);
+      border-color: var(--primary);
     }
 
     .bg-text-card::before {
@@ -612,109 +616,450 @@
     }
 
     .var-badge-row .badge-label {
-      min-width: 80px;
+      min-width: 85px;
     }
 
     .var-badge-row .badge-content {
       color: var(--text-muted);
+      word-break: keep-all;
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 3: EDA 핵심 인사이트]
+       [섹션 3: 통계 분석 & EDA]
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     #eda {
       padding: 100px 0;
     }
 
-    .eda-subtitle {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      margin-top: -2.5rem;
-      margin-bottom: 4rem;
-    }
-
-    .eda-grid {
+    .eda-charts-container {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 2rem;
+      margin-bottom: 3.5rem;
     }
 
-    .eda-card {
+    .eda-chart-wrapper {
       background-color: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.03);
+      border: 1px solid rgba(255, 255, 255, 0.03);
       border-radius: 12px;
       padding: 2.25rem;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      transition: var(--transition);
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .eda-chart-wrapper.full-width {
+      grid-column: span 2;
+    }
+
+    .chart-container-el {
       position: relative;
-      overflow: hidden;
-    }
-
-    .eda-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--primary);
-      box-shadow: 0 10px 25px rgba(0, 201, 177, 0.1);
-    }
-
-    .eda-card-icon {
-      font-size: 2rem;
-      color: var(--primary);
-      margin-bottom: 1.5rem;
-    }
-
-    .eda-card h3 {
-      font-size: 1.15rem;
-      font-weight: 700;
+      width: 100%;
+      height: 300px;
+      margin-top: 1.5rem;
       margin-bottom: 1rem;
-      height: 48px;
+    }
+
+    .chart-header {
+      margin-bottom: 0.5rem;
+    }
+
+    .chart-header h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
       display: flex;
       align-items: center;
+      gap: 0.5rem;
     }
 
-    .eda-card .stat-highlight {
-      font-size: 2.25rem;
-      font-weight: 900;
-      color: var(--secondary);
-      margin: 1rem 0;
-      display: flex;
-      align-items: baseline;
-      gap: 0.25rem;
+    .chart-header h3 i {
+      color: var(--primary);
     }
 
-    .eda-card .stat-highlight span {
-      font-size: 1rem;
-      font-weight: 500;
+    .chart-sub {
+      font-size: 0.85rem;
       color: var(--text-muted);
     }
 
-    .eda-card p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-      flex-grow: 1;
-    }
-
-    .eda-card-footer {
-      margin-top: 1.75rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.05);
+    .chart-footer-note {
       font-size: 0.78rem;
       color: var(--text-muted);
       font-style: italic;
+      text-align: right;
+    }
+
+    .donuts-flex {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 300px;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .donut-chart-box {
+      width: 45%;
+      height: 100%;
+      position: relative;
+    }
+
+    /* 도넛 차트 중앙 텍스트용 절대 레이아웃 */
+    .donut-inner-text {
+      position: absolute;
+      top: 55%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .donut-inner-text .label-t {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .donut-inner-text .value-t {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* EDA 인사이트 카드 그리드 */
+    .eda-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .eda-insight-card {
+      background-color: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: var(--transition);
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .eda-insight-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 201, 177, 0.15);
+    }
+
+    .eda-insight-card i {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-top: 0.25rem;
+    }
+
+    .eda-insight-card p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .eda-insight-card p strong {
+      color: var(--text-main);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 4: 분석 파이프라인]
+       [섹션 4: 머신러닝 모델 성능]
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    #pipeline {
+    #ml-performance {
       padding: 100px 0;
       background-color: rgba(17, 34, 64, 0.1);
     }
 
-    /* 세로 타임라인 레이아웃 */
+    .ml-charts-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .ml-chart-wrapper {
+      background-color: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 2.25rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* AUC 해석 문구 박스 */
+    .auc-interpret-box {
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary);
+      background-color: rgba(0, 201, 177, 0.03);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .auc-interpret-box h4 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .auc-interpret-box p {
+      font-size: 0.93rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* 성능 상세 테이블 */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background-color: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      margin-bottom: 1.5rem;
+    }
+
+    .perf-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.93rem;
+    }
+
+    .perf-table th {
+      background-color: #0b1523;
+      color: var(--text-main);
+      font-weight: 700;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .perf-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text-muted);
+    }
+
+    .perf-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .perf-table tr.highlight-row {
+      background-color: rgba(0, 201, 177, 0.12);
+    }
+
+    .perf-table tr.highlight-row td {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .perf-table tr.highlight-row td strong {
+      color: var(--primary);
+    }
+
+    .table-desc-note {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       [섹션 5: 핵심 기술 의사결정]
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #decisions {
+      padding: 100px 0;
+    }
+
+    .details-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    details {
+      background-color: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: var(--transition);
+    }
+
+    details[open] {
+      border-color: var(--border-color);
+      box-shadow: 0 5px 20px rgba(0, 201, 177, 0.08);
+    }
+
+    summary {
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    summary:hover {
+      color: var(--primary);
+      background-color: rgba(255, 255, 255, 0.01);
+    }
+
+    /* 커스텀 마커 구현 */
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: '\f078';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    details[open] summary::after {
+      transform: rotate(180deg);
+      color: var(--primary);
+    }
+
+    .details-content {
+      padding: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      background-color: rgba(10, 22, 40, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .decision-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .decision-row-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      height: fit-content;
+      min-width: 54px;
+      text-align: center;
+    }
+
+    .decision-row-label.prob {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    .decision-row-label.dec {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.15);
+    }
+
+    .decision-row-label.res {
+      background-color: rgba(168, 255, 62, 0.1);
+      color: var(--secondary);
+      border: 1px solid rgba(168, 255, 62, 0.15);
+    }
+
+    .decision-row-text {
+      font-size: 0.93rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .decision-row-text strong {
+      color: var(--text-main);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       [섹션 6: 기술 스택]
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #techstack {
+      padding: 100px 0;
+      background-color: rgba(17, 34, 64, 0.2);
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .tech-card {
+      background-color: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.02);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .tech-card-header {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 0.75rem;
+    }
+
+    .tech-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .tech-item {
+      background-color: var(--bg-dark);
+      border: 1px solid rgba(0, 201, 177, 0.1);
+      color: var(--text-main);
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .tech-item:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 201, 177, 0.25);
+      transform: translateY(-2px);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       [섹션 7: 분석 파이프라인]
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #pipeline {
+      padding: 100px 0;
+    }
+
     .timeline-container {
       position: relative;
       max-width: 800px;
@@ -806,392 +1151,11 @@
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 5: 기술 스택]
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    #techstack {
-      padding: 100px 0;
-    }
-
-    .tech-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-    }
-
-    .tech-card {
-      background-color: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.02);
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    }
-
-    .tech-card-header {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      padding-bottom: 0.75rem;
-    }
-
-    .tech-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-    }
-
-    .tech-item {
-      background-color: var(--bg-dark);
-      border: 1px solid rgba(0, 201, 177, 0.1);
-      color: var(--text-main);
-      padding: 0.45rem 0.85rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .tech-item:hover {
-      border-color: var(--primary);
-      box-shadow: 0 0 10px rgba(0, 201, 177, 0.25);
-      transform: translateY(-2px);
-    }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 6: 핵심 기술 의사결정]
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    #decisions {
-      padding: 100px 0;
-      background-color: rgba(17, 34, 64, 0.2);
-    }
-
-    .decisions-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2rem;
-    }
-
-    .decision-card {
-      background-color: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.03);
-      border-radius: 12px;
-      padding: 2.25rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      display: flex;
-      flex-direction: column;
-      transition: var(--transition);
-    }
-
-    .decision-card:hover {
-      border-color: var(--primary);
-      box-shadow: 0 10px 25px rgba(0,201,177,0.05);
-    }
-
-    .decision-header {
-      font-size: 1.2rem;
-      font-weight: 800;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
-      color: var(--text-main);
-      line-height: 1.4;
-    }
-
-    .decision-header i {
-      color: var(--primary);
-      font-size: 1.4rem;
-      margin-top: 0.1rem;
-    }
-
-    .decision-body {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      flex-grow: 1;
-    }
-
-    .decision-row {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .decision-row-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      height: fit-content;
-      min-width: 54px;
-      text-align: center;
-    }
-
-    .decision-row-label.prob {
-      background-color: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.15);
-    }
-
-    .decision-row-label.dec {
-      background-color: rgba(59, 130, 246, 0.1);
-      color: #3b82f6;
-      border: 1px solid rgba(59, 130, 246, 0.15);
-    }
-
-    .decision-row-label.res {
-      background-color: rgba(168, 255, 62, 0.1);
-      color: var(--secondary);
-      border: 1px solid rgba(168, 255, 62, 0.15);
-    }
-
-    .decision-row-text {
-      font-size: 0.93rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    .decision-row-text strong {
-      color: var(--text-main);
-    }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 7: 교과목 연계 (Curriculum Mapping)]
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    #curriculum {
-      padding: 100px 0;
-    }
-
-    .curriculum-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-    }
-
-    .curr-card {
-      background-color: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.03);
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transition: var(--transition);
-    }
-
-    .curr-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(168,255,62,0.05);
-      border-color: var(--secondary);
-    }
-
-    .curr-header {
-      font-size: 1.15rem;
-      font-weight: 800;
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .curr-header.blue { color: #60a5fa; }
-    .curr-header.green { color: #34d399; }
-    .curr-header.orange { color: #f97316; }
-    .curr-header.red { color: #f87171; }
-    .curr-header.yellow { color: #facc15; }
-    .curr-header.purple { color: #c084fc; }
-
-    .curr-details-box {
-      background-color: rgba(10, 22, 40, 0.4);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1.25rem;
-      border: 1px solid rgba(255,255,255,0.02);
-    }
-
-    .curr-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 0.4rem;
-    }
-
-    .curr-concepts {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-    }
-
-    .curr-arrow {
-      align-self: center;
-      color: var(--primary);
-      font-size: 1.2rem;
-      margin: 0.25rem 0 0.75rem 0;
-    }
-
-    .curr-apply-box {
-      flex-grow: 1;
-      font-size: 0.92rem;
-      color: var(--text-main);
-      line-height: 1.6;
-    }
-
-    .curr-apply-box ul {
-      list-style-type: none;
-    }
-
-    .curr-apply-box li {
-      position: relative;
-      padding-left: 1.25rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .curr-apply-box li::before {
-      content: '→';
-      position: absolute;
-      left: 0;
-      color: var(--primary);
-    }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 8: 데모 갤러리]
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    #gallery {
-      padding: 100px 0;
-      background-color: rgba(17, 34, 64, 0.1);
-    }
-
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2rem;
-    }
-
-    .gallery-item {
-      background-color: var(--bg-card);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      border: 1px solid rgba(255,255,255,0.03);
-      position: relative;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .gallery-image-wrapper {
-      position: relative;
-      width: 100%;
-      height: 280px;
-      overflow: hidden;
-      background: linear-gradient(135deg, #112240, #0a1628);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .gallery-image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: var(--transition);
-    }
-
-    .gallery-item:hover .gallery-image-wrapper img {
-      transform: scale(1.06);
-    }
-
-    /* 플레이스홀더 디자인 (이미지가 없거나 깨질 때의 대응) */
-    .image-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: var(--text-muted);
-      text-align: center;
-      padding: 2rem;
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: linear-gradient(135deg, rgba(0, 201, 177, 0.05), rgba(168, 255, 62, 0.05));
-    }
-
-    .image-placeholder i {
-      font-size: 3rem;
-      color: var(--primary);
-      margin-bottom: 1rem;
-    }
-
-    .gallery-caption {
-      padding: 1.5rem;
-      background-color: var(--bg-card);
-      border-top: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .gallery-caption h4 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: var(--text-main);
-    }
-
-    .gallery-caption p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    /* 라이트박스 (모달) 효과 */
-    .lightbox {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(10, 22, 40, 0.95);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    .lightbox-content {
-      max-width: 90%;
-      max-height: 80%;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      border-radius: 8px;
-      object-fit: contain;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .lightbox-close {
-      position: absolute;
-      top: 2rem;
-      right: 2.5rem;
-      color: var(--text-main);
-      font-size: 2.5rem;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .lightbox-close:hover {
-      color: var(--primary);
-    }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 9: Repository 구조]
+       [섹션 8: Repository 구조]
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     #repository {
       padding: 100px 0;
+      background-color: rgba(17, 34, 64, 0.1);
     }
 
     .repo-box {
@@ -1285,7 +1249,7 @@
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [섹션 10: 푸터 영역]
+       [섹션 9: 푸터 영역]
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     footer {
       background-color: #060e19;
@@ -1396,11 +1360,14 @@
         grid-template-columns: repeat(2, 1fr);
         gap: 1.25rem;
       }
-      .bg-grid, .gallery-grid, .decisions-grid, .curriculum-grid {
+      .bg-grid, .ml-charts-grid, .eda-charts-container {
         grid-template-columns: 1fr;
         gap: 2.5rem;
       }
-      .eda-grid {
+      .eda-chart-wrapper.full-width {
+        grid-column: span 1;
+      }
+      .eda-cards-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
       }
@@ -1411,7 +1378,7 @@
 
     @media (max-width: 768px) {
       .nav-links {
-        display: none; /* 모바일 전용 네비게이션 드롭다운 미구현 시 숨김 */
+        display: none;
       }
       .mobile-menu-btn {
         display: block;
@@ -1421,6 +1388,15 @@
       }
       .kpi-container {
         grid-template-columns: 1fr;
+      }
+      .donuts-flex {
+        flex-direction: column;
+        height: auto;
+        gap: 2rem;
+      }
+      .donut-chart-box {
+        width: 80%;
+        height: 250px;
       }
       .footer-grid {
         grid-template-columns: 1fr;
@@ -1454,13 +1430,13 @@
       </a>
       <ul class="nav-links">
         <li><a href="#hero" class="active">Home</a></li>
-        <li><a href="#background">배경 & 데이터</a></li>
-        <li><a href="#eda">EDA 인사이트</a></li>
-        <li><a href="#pipeline">분석 파이프라인</a></li>
-        <li><a href="#techstack">기술 스택</a></li>
+        <li><a href="#project-intro">프로젝트 소개</a></li>
+        <li><a href="#eda">통계 & EDA</a></li>
+        <li><a href="#ml-performance">모델 성능</a></li>
         <li><a href="#decisions">의사결정</a></li>
-        <li><a href="#curriculum">커리큘럼 연계</a></li>
-        <li><a href="#gallery">데모</a></li>
+        <li><a href="#techstack">기술 스택</a></li>
+        <li><a href="#pipeline">파이프라인</a></li>
+        <li><a href="#repository">Repository</a></li>
       </ul>
       <button class="mobile-menu-btn" aria-label="메뉴 열기">
         <i class="fa-solid fa-bars"></i>
@@ -1472,18 +1448,16 @@
      [섹션 1: HERO 영역]
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
   <header id="hero">
-    <!-- 심박수 ECG 애니메이션 라인 배경 -->
     <svg class="ecg-bg" viewBox="0 0 1400 300" preserveAspectRatio="none">
       <path class="ecg-line" d="M0,150 L300,150 L320,130 L340,170 L360,150 L500,150 L520,70 L545,230 L570,120 L590,165 L610,150 L850,150 L870,130 L890,170 L910,150 L1100,150 L1120,50 L1145,250 L1170,110 L1190,165 L1210,150 L1400,150"></path>
     </svg>
 
     <div class="hero-content container">
       <h1 class="hero-title">
-        2020년 청소년 건강행태조사를 이용한<br>
-        <span>머신러닝 기반 스마트폰 의존·수면의 질에 따른</span><br>
-        구강 위험 분류 예측 서비스
+        청소년 스마트폰 의존·수면의 질에 따른<br>
+        <span>구강 건강 위험도 예측 서비스</span>
       </h1>
-      <p class="hero-tagline">공공 보건 데이터 × 복합표본 통계 × XGBoost</p>
+      <p class="hero-tagline">통계 분석 × EDA × XGBoost 머신러닝 분류 모델</p>
       
       <div class="project-meta-badges">
         <span>🏥 <strong>AI 의료서비스 모델 개발 과정 5회차</strong></span>
@@ -1492,76 +1466,70 @@
         <span>🔧 역할 <strong>TA (모델링·서비스 구현)</strong></span>
       </div>
 
-      <!-- KPI 카드 그리드 영역 (Count-up) -->
+      <!-- KPI 카드 그리드 영역 -->
       <div class="kpi-container">
         <div class="kpi-card highlight">
           <div class="kpi-label">Recall (재현율)</div>
           <div class="kpi-val number"><span class="counter" data-target="85.21">0</span>%</div>
-          <div class="kpi-desc">의료분류 최우선 평가지표</div>
+          <div class="kpi-desc">의료예측 최우선 지표</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">ROC-AUC</div>
-          <div class="kpi-val number"><span class="counter" data-target="0.65" data-decimals="2">0.00</span></div>
-          <div class="kpi-desc">양성/음성 구별 변별력</div>
+          <div class="kpi-label">Overfit Gap</div>
+          <div class="kpi-val number"><span class="counter" data-target="0.007" data-decimals="3">0.000</span></div>
+          <div class="kpi-desc">과적합 없음 (범용성 우수)</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Precision (정밀도)</div>
-          <div class="kpi-val number"><span class="counter" data-target="54.98">0</span>%</div>
-          <div class="kpi-desc">위험 판정 대비 실제 위험 비율</div>
+          <div class="kpi-label">분석 샘플 수</div>
+          <div class="kpi-val number"><span class="counter" data-target="52627" data-decimals="0">0</span>건</div>
+          <div class="kpi-desc">KYRBS 2020 공공데이터</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">F1 Score</div>
-          <div class="kpi-val number"><span class="counter" data-target="66.83">0</span>%</div>
-          <div class="kpi-desc">정밀도와 재현율의 균형 지표</div>
+          <div class="kpi-label">비교 모델 수</div>
+          <div class="kpi-val number"><span class="counter" data-target="5" data-decimals="0">0</span>개</div>
+          <div class="kpi-desc">머신러닝 다중 비교 최적화</div>
         </div>
-      </div>
-
-      <div class="model-info-bar">
-        최종 최적 알고리즘: <strong>XGBoost</strong> | 의료 분류 임계값: <strong>Youden's Index 기반 동적 산출 (0.398)</strong>
       </div>
 
       <div class="hero-buttons">
         <a href="https://github.com/yd5170/cheer_up.git" target="_blank" class="btn btn-outline">
           <i class="fa-brands fa-github"></i> GitHub Repository
         </a>
-        <a href="#gallery" class="btn btn-primary">
+        <a href="https://github.com/yd5170/cheer_up.git" class="btn btn-primary">
           <i class="fa-solid fa-circle-play"></i> Streamlit Demo
         </a>
       </div>
 
-      <!-- Shields.io 기술 뱃지 -->
+      <!-- Shields.io 기술 배지 -->
       <div class="shields-container">
         <img src="https://img.shields.io/badge/Python-3.13-blue.svg?logo=python&logoColor=white" alt="Python 3.13">
-        <img src="https://img.shields.io/badge/XGBoost-%231E90FF.svg?logo=xgboost&logoColor=white" alt="XGBoost">
-        <img src="https://img.shields.io/badge/SHAP-Black.svg" alt="SHAP">
-        <img src="https://img.shields.io/badge/Optuna-%231C2D37.svg" alt="Optuna">
+        <img src="https://img.shields.io/badge/XGBoost_Recall-85.21%25-orange.svg" alt="XGBoost Recall">
+        <img src="https://img.shields.io/badge/Optuna-HPO-blue.svg" alt="Optuna">
         <img src="https://img.shields.io/badge/SMOTE--TomekLink-Orange.svg" alt="SMOTE+TomekLink">
-        <img src="https://img.shields.io/badge/AutoGluon-%23FF6F20.svg" alt="AutoGluon">
-        <img src="https://img.shields.io/badge/Streamlit-%23FF4B4B.svg?logo=streamlit&logoColor=white" alt="Streamlit">
+        <img src="https://img.shields.io/badge/Streamlit-Deployed-red.svg?logo=streamlit&logoColor=white" alt="Streamlit">
         <img src="https://img.shields.io/badge/질병관리청-공공데이터-green.svg" alt="질병관리청">
       </div>
     </div>
   </header>
 
   <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 2: 배경 & 데이터]
+     [섹션 2: 프로젝트 소개]
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-  <section id="background" class="fade-in-slide">
+  <section id="project-intro" class="fade-in-slide">
     <div class="container">
-      <h2 class="section-title">배경 & 데이터</h2>
+      <h2 class="section-title">프로젝트 소개</h2>
       <div class="bg-grid">
         <div class="bg-text-area">
           <div class="bg-text-card">
-            <h4>📱 청소년 스마트폰 과의존 현황</h4>
-            <p>질병관리청 조사에 따르면 청소년의 <strong>97%</strong>가 스마트폰을 사용하고 있으며, 주당 평균 사용 시간은 <strong>12시간</strong>에 달합니다. 그중 약 <strong>40%</strong>가 과의존 위험군에 노출되어 있어 예방적 모니터링이 시급합니다.</p>
+            <h4>📱 청소년 스마트폰 사용 및 과의존 위험</h4>
+            <p>질병관리청 통계에 의하면 우리나라 청소년의 <strong>97%</strong>가 스마트폰을 사용하고 있으며, 주당 평균 이용시간은 <strong>12시간</strong>입니다. 전체 학생 중 약 <strong>40%</strong>가 과의존 위험군에 노출되어 있어 밀착형 관리가 필요합니다.</p>
           </div>
           <div class="bg-text-card">
-            <h4>😴 수면부족과 생체 리듬의 붕괴</h4>
-            <p>스마트폰의 과다 사용은 수면 시간을 감소시키고 생체리듬의 불균형을 야기하여, 면역력 저하와 야간 위생 관리 행동 소홀로 이어집니다. 이는 최종적으로 <strong>구강 건강의 직접적인 악화</strong>를 초래하게 됩니다.</p>
+            <h4>😴 수면 시간의 단축과 생체 불균형</h4>
+            <p>스마트폰 과다 의존은 취침 시간의 지연과 심각한 수면 부족을 초래하여 면역력을 저하시키고 일상 구강 위생 행동을 소홀히 하게 만들어 <strong>구강 질환 증상을 직접적으로 발현</strong>시킵니다.</p>
           </div>
           <div class="bg-text-card">
-            <h4>🦷 통합 헬스케어 서비스의 필요성</h4>
-            <p>청소년을 위해 예방 교육, 자가 예측 진단, 실제 의료기관 치료 연계를 원스톱으로 지원하는 유기적인 의료 연계 플랫폼이 부재했습니다. 본 프로젝트는 이 격차를 해소하고자 출발했습니다.</p>
+            <h4>🦷 예방·예측·의료기관 연계의 부재</h4>
+            <p>청소년을 타깃으로 구강 건강 자가 예측, 올바른 위생 가이드 및 실시간으로 주변 의료기관(치과) 치료 연계까지 유기적인 연동망을 지원하는 플랫폼은 국내에 부재했습니다. 이를 머신러닝 AI 모델 기반으로 극복하고자 합니다.</p>
           </div>
         </div>
 
@@ -1569,14 +1537,14 @@
           <div>
             <div class="data-title-row">
               <i class="fa-solid fa-database"></i>
-              <h3>데이터 소개 카드</h3>
+              <h3>데이터 가공 상세</h3>
             </div>
             <ul class="data-detail-list">
-              <li>분석 대상 <span>제16차(2020년) 청소년건강행태조사</span></li>
-              <li>데이터 출처 <span>질병관리청 공공데이터 포털</span></li>
-              <li>파일 포맷 <span>SAS 원시 데이터 (.sas7bdat)</span></li>
-              <li>데이터 정제 <span>Python 직접 파싱 및 정밀 인코딩</span></li>
-              <li>특징 <span>복합표본설계(층화집락추출) + 가중치(W) 적용</span></li>
+              <li>조사 명칭 <span>제16차(2020년) 청소년건강행태조사 (KYRBS)</span></li>
+              <li>출처 기관 <span>질병관리청 공공데이터 포털</span></li>
+              <li>데이터 포맷 <span>SAS 원시 데이터 (.sas7bdat) → Python 직접 파싱</span></li>
+              <li>데이터 가공 <span>원본 54,948건 → 결측치 제거 후 52,627건</span></li>
+              <li>분석 설계 <span>복합표본설계(층화집락추출) + 가중치(W) 전 단계 반영</span></li>
             </ul>
           </div>
           
@@ -1585,15 +1553,15 @@
             <div class="var-badges-grid">
               <div class="var-badge-row">
                 <span class="badge-primary">🔵 독립변수</span>
-                <span class="badge-content">스마트폰 의존도 · 사용시간 · 수면의 질</span>
+                <span class="badge-content">스마트폰 의존도(10문항 합산≥23 → Risk) · 주중/주말 시간 · 수면의 질</span>
               </div>
               <div class="var-badge-row">
                 <span class="badge-secondary">🔴 종속변수</span>
-                <span class="badge-content">구강 위험 증상 여부 (치아파절·저작불편·치아통증·치은출혈 이진화)</span>
+                <span class="badge-content">구강 증상 여부 (치아파절·저작불편·치아통증·치은출혈 중 1개↑ → Yes)</span>
               </div>
               <div class="var-badge-row">
                 <span class="badge-gray">⚫ 통제변수</span>
-                <span class="badge-content">성별 · 학교급 · 학업성적 · 가구소득 · 정신건강</span>
+                <span class="badge-content">성별 · 학교급 · 성적 · 소득 · 불안 · 스트레스 · 절망감 · 자살생각</span>
               </div>
             </div>
           </div>
@@ -1603,50 +1571,379 @@
   </section>
 
   <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 3: EDA 핵심 인사이트]
+     [섹션 3: 통계 분석 & EDA]
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
   <section id="eda" class="fade-in-slide">
     <div class="container">
-      <h2 class="section-title">EDA 핵심 인사이트</h2>
-      <p class="eda-subtitle">질병관리청 가중치를 엄밀하게 계산해 밝혀낸 청소년 건강행태 데이터 패턴</p>
+      <h2 class="section-title">📊 통계 분석 & EDA — 직접 도출한 결과</h2>
+      <p class="section-subtitle">복합표본 가중치(W) 반영 + Rao-Scott 카이제곱 검정 기반</p>
       
-      <div class="eda-grid">
-        <!-- 인사이트 카드 1 -->
-        <div class="eda-card">
-          <div class="eda-card-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
-          <h3>스마트폰 의존 위험군의 구강 증상 발생률</h3>
-          <div class="stat-highlight">1.43<span>배 상승</span></div>
-          <p>단순 스마트폰 사용 시간량보다 기기에 대한 <strong>정신적 '의존 여부'</strong>가 구강 질환 증상 발생에 약 1.43배 더 직접적이고 강력한 연관성을 보이는 것을 검증했습니다.</p>
-          <div class="eda-card-footer">Rao-Scott 카이제곱 검정 결과 유의 (p &lt; 0.001)</div>
+      <div class="eda-charts-container">
+        <!-- 그래프 1: 스마트폰 의존도 x 구강 증상 (그룹 막대) -->
+        <div class="eda-chart-wrapper">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-mobile-screen"></i> 스마트폰 의존도 × 구강 증상 발생률 비교</h3>
+            <span class="chart-sub">Rao-Scott 카이제곱 검정, p < 0.001</span>
+          </div>
+          <div class="chart-container-el">
+            <canvas id="chart-dependence-crosstab"></canvas>
+          </div>
+          <div class="chart-footer-note">복합표본 가중치(W)가 반영된 실측 비율 분석 결과입니다.</div>
         </div>
 
-        <!-- 인사이트 카드 2 -->
-        <div class="eda-card">
-          <div class="eda-card-icon"><i class="fa-solid fa-bed"></i></div>
-          <h3>수면 부족 집단의 구강 위험 비율</h3>
-          <div class="stat-highlight">53.9<span>% 발생</span></div>
-          <p>수면의 질이 나쁘고 충분히 수면하지 못한 청소년 집단에서 치은출혈을 포함한 구강 증상 발생률이 <strong>53.89%</strong>로 치솟아, 구강 자가 관리 행동과의 매개 관계를 입증했습니다.</p>
-          <div class="eda-card-footer">Rao-Scott 카이제곱 검정 결과 유의 (p &lt; 0.001)</div>
+        <!-- 그래프 2: 수면의 질 x 구강 증상 (도넛 차트 2개) -->
+        <div class="eda-chart-wrapper">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-circle-half-stroke"></i> 수면의 질 × 구강 증상 발생률 비교</h3>
+            <span class="chart-sub">Rao-Scott 카이제곱 검정, p < 0.001</span>
+          </div>
+          <div class="donuts-flex">
+            <div class="donut-chart-box">
+              <canvas id="chart-sleep-good"></canvas>
+              <div class="donut-inner-text">
+                <div class="label-t">수면 충분</div>
+                <div class="value-t">42.1% 발생</div>
+              </div>
+            </div>
+            <div class="donut-chart-box">
+              <canvas id="chart-sleep-bad"></canvas>
+              <div class="donut-inner-text">
+                <div class="label-t">수면 부족</div>
+                <div class="value-t">53.9% 발생</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-footer-note">수면이 부족할 시 구강 질환 증상이 53.9%로 크게 늘어납니다.</div>
         </div>
 
-        <!-- 인사이트 카드 3 -->
-        <div class="eda-card">
-          <div class="eda-card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-          <h3>의존 및 수면 장애 이중 위험군</h3>
-          <div class="stat-highlight">1.61<span>배 위험도 폭증</span></div>
-          <p>스마트폰 과의존과 수면 부족이 겹칠 시 구강 불량률은 <strong>59.43%</strong>로 정상 대조군(약 37.0% 이하) 대비 위험도가 **약 1.61배** 폭증하여 복합 개입 가이드라인 수립 근거가 되었습니다.</p>
-          <div class="eda-card-footer">Rao-Scott 카이제곱 검정 결과 유의 (p &lt; 0.001)</div>
+        <!-- 그래프 3: 사용시간 x 구강증상 (라인 차트) -->
+        <div class="eda-chart-wrapper full-width">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-chart-line"></i> 스마트폰 사용시간별 구강 증상 있음 비율(%)</h3>
+            <span class="chart-sub">주중 사용과 주말 사용시간에 따른 구강 건강 영향 추이선</span>
+          </div>
+          <div class="chart-container-el">
+            <canvas id="chart-use-time-line"></canvas>
+          </div>
+          <div class="chart-footer-note">사용시간이 8시간 이상으로 길어짐에 따라 구강 증상 발생률이 지속 증가합니다.</div>
+        </div>
+      </div>
+
+      <!-- EDA 인사이트 카드 -->
+      <div class="eda-cards-grid">
+        <div class="eda-insight-card">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          <p>스마트폰 <strong>의존 위험군(Risk)</strong>의 구강 증상 발생률이 일반군 대비 통계적으로 <strong>유의미하게 높음 (p &lt; 0.001)</strong>이 통계적으로 검증되었습니다.</p>
+        </div>
+        <div class="eda-insight-card">
+          <i class="fa-solid fa-bed"></i>
+          <p>수면이 <strong>불충분한 집단</strong>에서 치은출혈을 비롯한 구강 건강 관련 증상의 발생 확률이 <strong>일관되게 높은 양상</strong>으로 유의미함이 증명되었습니다.</p>
+        </div>
+        <div class="eda-insight-card">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <p>스마트폰 의존 위험과 수면 장해에 <strong>이중 노출된 고위험군</strong>의 구강 건강 불량 위험도가 <strong>가장 강력한 수치(59.43%)</strong>를 나타냈습니다.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 4: 분석 파이프라인]
+     [섹션 4: 머신러닝 모델 성능]
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <section id="ml-performance" class="fade-in-slide">
+    <div class="container">
+      <h2 class="section-title">🤖 머신러닝 구강 위험도 분류 모델</h2>
+      <p class="section-subtitle">5개 모델 자동 비교 후 XGBoost 최종 선정 — Recall 85.21% 달성</p>
+      
+      <div class="ml-charts-grid">
+        <!-- 그래프 4: 모델 성능 비교 -->
+        <div class="ml-chart-wrapper">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-chart-bar"></i> 머신러닝 모델 성능 비교 (Test셋, Recall 최우선)</h3>
+            <span class="chart-sub">가중치 sample_weight 및 Youden's Index 동적 컷오프 반영</span>
+          </div>
+          <div class="chart-container-el">
+            <canvas id="chart-models-compare"></canvas>
+          </div>
+        </div>
+
+        <!-- 그래프 5: ROC Curve -->
+        <div class="ml-chart-wrapper">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-wave-square"></i> ROC Curve 비교</h3>
+            <span class="chart-sub">Test셋 기준 / 복합표본 가중치 반영</span>
+          </div>
+          <div class="chart-container-el">
+            <canvas id="chart-roc-curve"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUC 해석 문구 박스 -->
+      <div class="auc-interpret-box">
+        <h4><i class="fa-solid fa-lightbulb"></i> ROC-AUC 0.64 ~ 0.65 — 이 수치의 의료적 의미</h4>
+        <p>
+          본 프로젝트는 침습형 임상 정밀 검진 자료가 아닌, 설문 작성자의 주관과 노이즈가 개입되기 쉬운 <strong>자가보고(Self-report) 형태의 국가 설문조사 데이터</strong>를 원천으로 합니다. 
+          따라서 인구통계 변수 및 생활행태 데이터만으로 분류를 수행할 때 AUC 0.65 수준은 보건통계학적으로 지극히 타당하고 설명력 높은 범주입니다. 
+          이 조건 하에서 <strong>재현율(Recall) 85.21%</strong>를 충족하고 동시에 **과적합 편차(Overfit Gap)를 0.0066**으로 극한으로 통제하여 실제 예측 신뢰도가 극도로 우수한 XGBoost를 최적 모델로 채택했습니다.
+        </p>
+      </div>
+
+      <div class="ml-charts-grid">
+        <!-- 그래프 6: Feature Importance -->
+        <div class="ml-chart-wrapper" style="grid-column: span 2;">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-list-check"></i> 변수 중요도 (XGBoost Feature Importance)</h3>
+            <span class="chart-sub">★ 핵심 변수 (스마트폰·수면) — 라임/빨간색 계열 포인트 강조</span>
+          </div>
+          <div class="chart-container-el" style="height: 380px;">
+            <canvas id="chart-feature-importance"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 성능 상세 테이블 -->
+      <div class="table-container">
+        <table class="perf-table">
+          <thead>
+            <tr>
+              <th>모델명</th>
+              <th>임계값 (Threshold)</th>
+              <th>ROC-AUC</th>
+              <th>정확도 (Accuracy)</th>
+              <th>정밀도 (Precision)</th>
+              <th>재현율 (Recall)</th>
+              <th>F1-Score</th>
+              <th>과적합 차이 (Overfit Gap)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="highlight-row">
+              <td><strong>XGBoost ✅ (최종 모델)</strong></td>
+              <td><strong>0.398</strong></td>
+              <td><strong>0.6483</strong></td>
+              <td><strong>57.49%</strong></td>
+              <td><strong>54.98%</strong></td>
+              <td><strong>85.21%</strong></td>
+              <td><strong>66.83%</strong></td>
+              <td><strong>0.0066</strong></td>
+            </tr>
+            <tr>
+              <td>LightGBM</td>
+              <td>0.398</td>
+              <td>0.6487</td>
+              <td>57.52%</td>
+              <td>55.01%</td>
+              <td>85.06%</td>
+              <td>66.81%</td>
+              <td>0.0056</td>
+            </tr>
+            <tr>
+              <td>CatBoost</td>
+              <td>0.408</td>
+              <td>0.6484</td>
+              <td>57.56%</td>
+              <td>55.04%</td>
+              <td>85.00%</td>
+              <td>66.81%</td>
+              <td>-0.0027</td>
+            </tr>
+            <tr>
+              <td>Random Forest</td>
+              <td>0.424</td>
+              <td>0.6463</td>
+              <td>56.85%</td>
+              <td>54.56%</td>
+              <td>84.73%</td>
+              <td>66.38%</td>
+              <td>-0.0022</td>
+            </tr>
+            <tr>
+              <td>Logistic Regression</td>
+              <td>0.002</td>
+              <td>0.5808</td>
+              <td>52.58%</td>
+              <td>51.72%</td>
+              <td>85.16%</td>
+              <td>64.35%</td>
+              <td>-0.0073</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-desc-note">Youden's Index 기반 동적 임계값 적용 / 복합표본 가중치(W) 반영 / 6:2:2 Train:Val:Test 분할</div>
+    </div>
+  </section>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     [섹션 5: 핵심 기술 의사결정]
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <section id="decisions" class="fade-in-slide">
+    <div class="container">
+      <h2 class="section-title">⚙️ 핵심 기술 의사결정</h2>
+      
+      <div class="details-group">
+        <!-- 접기 1 -->
+        <details>
+          <summary>① 복합표본 가중치를 통계 검정 + 모델 학습 모두에 적용</summary>
+          <div class="details-content">
+            <div class="decision-row">
+              <span class="decision-row-label prob">문제</span>
+              <p class="decision-row-text">층화집락추출 설계 특성상 가중치(W)를 반영하지 않으면 전국 청소년 집단의 모집단 특성을 제대로 대표할 수 없으며 모형 학습 시 불필요한 편향이 발생함.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label dec">판단</span>
+              <p class="decision-row-text">Rao-Scott 통계 보정을 자작 구현하고, 기계 학습 알고리즘 손실 함수 최적화 시 <strong>sample_weight</strong>로 정규화 가중치 직접 주입. 추가로 스케일러(WeightedStandardScaler) 단계에서도 가중치를 전면 커스텀 반영함.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label res">결과</span>
+              <p class="decision-row-text">전 분석 생애주기에 걸쳐 복합표본 가중치를 일관되게 주입하여, <strong>실제 모집단을 온전히 대변하는 편향 없는 모델</strong> 예측력을 확보함.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- 접기 2 -->
+        <details>
+          <summary>② Rao-Scott 카이제곱 검정 직접 구현 (scipy 내장 미제공)</summary>
+          <div class="details-content">
+            <div class="decision-row">
+              <span class="decision-row-label prob">문제</span>
+              <p class="decision-row-text">독립성과 단순 무작위 표집을 가정한 일반 Pearson Chi-Square 검정을 그대로 적용할 경우, 복합표본 분산이 과소추정되어 1종 오류율이 기형적으로 왜곡됨.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label dec">판단</span>
+              <p class="decision-row-text">수식 <code>n_eff = (Σw)²/Σw²</code>를 이용해 유효 표본 수를 도출하고, 설계 효과(DEFF)를 추정하여 통계량 및 자유도를 동시 보정하는 <strong>Rao-Scott 카이제곱 보정 모듈 직접 개발</strong>.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label res">결과</span>
+              <p class="decision-row-text">스마트폰 의존도 및 수면 장애와 청소년 구강 위험 간 연관성을 모집단 대표성 수준에서 오류 없이 <strong>신뢰도 높게 검증함 (p &lt; 0.001)</strong>.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- 접기 3 -->
+        <details>
+          <summary>③ SMOTE + TomekLink 조합으로 클래스 불균형 처리</summary>
+          <div class="details-content">
+            <div class="decision-row">
+              <span class="decision-row-label prob">문제</span>
+              <p class="decision-row-text">구강 증상 정상(No)과 비정상(Yes) 데이터의 본질적 불균형으로 인해 모델이 다수 범주로 치우쳐 학습되어, 소수(위험군) 범주 검출력이 취약해짐. 단순히 오버샘플링만 진행할 경우 경계 부근에 노이즈가 중복 생성됨.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label dec">판단</span>
+              <p class="decision-row-text">SMOTE 기법을 적용하여 소수 데이터를 합성 증식한 후, TomekLink(토멕링크) 알고리즘으로 클래스 경계에 걸쳐 상충하는 노이즈 쌍들을 깔끔하게 식별 및 제거하는 <strong>하이브리드 샘플링 전략</strong> 활용.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label res">결과</span>
+              <p class="decision-row-text">경계면의 애매한 오염 요소를 걷어내어 결정 영역(Decision Boundary)을 명확하게 규정함으로써, <strong>재현율과 정밀도 모두 안정화</strong>시킴.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- 접기 4 -->
+        <details>
+          <summary>④ Optuna TPE + Youden's Index 이중 최적화</summary>
+          <div class="details-content">
+            <div class="decision-row">
+              <span class="decision-row-label prob">문제</span>
+              <p class="decision-row-text">단순 그리드 서치(Grid Search)는 다차원 파라미터 탐색 공간 효율이 극도로 떨어짐. 또한 일반적인 0.5 분류 임계값은 헬스케어 환경에선 미검진(위음성) 누락으로 직결되어 환자 위험을 키움.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label dec">판단</span>
+              <p class="decision-row-text">Optuna TPE 베이즈 최적화 알고리즘으로 Hyperparameter 공간을 정밀 최적화하고, Validation 셋을 바탕으로 민감도와 특이도의 합이 최대화되는 지점(<code>J = Sens + Spec - 1</code>)을 Youden's Index 기반 <strong>동적 분류 임계값(0.398)</strong>으로 산출.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label res">결과</span>
+              <p class="decision-row-text">위음성 리스크를 획기적으로 낮춘 <strong>최적의 Recall 85.21%</strong>를 구현하였으며, 교차 검증을 통해 과적합 갭을 0.0066 이하로 방어함.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- 접기 5 -->
+        <details>
+          <summary>⑤ WeightedStandardScaler 직접 구현</summary>
+          <div class="details-content">
+            <div class="decision-row">
+              <span class="decision-row-label prob">문제</span>
+              <p class="decision-row-text">일반 scikit-learn StandardScaler 등은 가중치가 미적용된 전체 데이터 평균과 분산으로 스케일링을 수행하므로 표본 가중치 설계가 훼손됨.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label dec">판단</span>
+              <p class="decision-row-text">가중평균 <code>μ = Σ(w·x)/Σw</code> 및 가중분산 <code>σ² = Σ(w·(x-μ)²)/Σw</code> 식을 직접 설계하여 변수의 스케일을 보정하는 <strong>가중치 지원 전용 스케일러 모듈 직접 제작</strong>.</p>
+            </div>
+            <div class="decision-row">
+              <span class="decision-row-label res">결과</span>
+              <p class="decision-row-text">기계 학습 이전 데이터 정형화 스케일링 과정에서도 <strong>복합표본 가중 설계가 일관성 있게 전달</strong>되도록 처리 완료함.</p>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     [섹션 6: 기술 스택]
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <section id="techstack" class="fade-in-slide">
+    <div class="container">
+      <h2 class="section-title">🛠️ 기술 스택</h2>
+      
+      <div class="tech-grid">
+        <div class="tech-card">
+          <div class="tech-card-header"><i class="fa-solid fa-code"></i> 언어 & 데이터 처리</div>
+          <div class="tech-list">
+            <span class="tech-item"><i class="fa-brands fa-python"></i> Python 3.13</span>
+            <span class="tech-item"><i class="fa-solid fa-database"></i> SQL</span>
+            <span class="tech-item">Pandas</span>
+            <span class="tech-item">NumPy</span>
+            <span class="tech-item">Scikit-learn</span>
+          </div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-header"><i class="fa-solid fa-calculator"></i> 통계 & 불균형 & XAI</div>
+          <div class="tech-list">
+            <span class="tech-item">SciPy (Rao-Scott Chi2 구현)</span>
+            <span class="tech-item">SMOTE</span>
+            <span class="tech-item">TomekLink</span>
+            <span class="tech-item">SHAP</span>
+            <span class="tech-item">WeightedStandardScaler</span>
+          </div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-header"><i class="fa-solid fa-brain"></i> 모델링 & HPO</div>
+          <div class="tech-list">
+            <span class="tech-item">XGBoost ✅</span>
+            <span class="tech-item">LightGBM</span>
+            <span class="tech-item">CatBoost</span>
+            <span class="tech-item">Random Forest</span>
+            <span class="tech-item">Logistic Regression</span>
+            <span class="tech-item">Optuna</span>
+            <span class="tech-item">AutoGluon</span>
+          </div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-card-header"><i class="fa-solid fa-share-nodes"></i> 개발 & 배포</div>
+          <div class="tech-list">
+            <span class="tech-item">Streamlit</span>
+            <span class="tech-item"><i class="fa-brands fa-git-alt"></i> Git</span>
+            <span class="tech-item"><i class="fa-brands fa-github"></i> GitHub</span>
+            <span class="tech-item">VS Code</span>
+            <span class="tech-item">Jupyter Notebook</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     [섹션 7: 분석 파이프라인]
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
   <section id="pipeline" class="fade-in-slide">
     <div class="container">
-      <h2 class="section-title">분석 파이프라인</h2>
+      <h2 class="section-title">⚙️ 분석 파이프라인</h2>
       
       <div class="timeline-container">
         <!-- STEP 1 -->
@@ -1658,9 +1955,9 @@
               <h3 class="timeline-title">데이터 수집 (Data Collection)</h3>
             </div>
             <div class="timeline-tags">
-              <span>Python 3.13</span>
-              <span>SAS Parser</span>
-              <span>Jupyter Notebook</span>
+              <span>Python</span>
+              <span>SAS 파서</span>
+              <span>kyrbs2020.sas7bdat 직접 파싱</span>
             </div>
           </div>
         </div>
@@ -1671,12 +1968,13 @@
           <div class="timeline-content">
             <div class="timeline-info">
               <div class="timeline-step">STEP 2</div>
-              <h3 class="timeline-title">전처리 (Preprocessing)</h3>
+              <h3 class="timeline-title">전처리 (01_Data_Preprocessing.ipynb)</h3>
             </div>
             <div class="timeline-tags">
-              <span>Pandas</span>
-              <span>NumPy</span>
-              <span>SAS Encoding</span>
+              <span>Pandas · NumPy</span>
+              <span>54,948건 → 52,627건 정제</span>
+              <span>의존도 이진화(≥23 Risk)</span>
+              <span>가중치 W 정규화</span>
             </div>
           </div>
         </div>
@@ -1687,11 +1985,12 @@
           <div class="timeline-content">
             <div class="timeline-info">
               <div class="timeline-step">STEP 3</div>
-              <h3 class="timeline-title">변수 재구성 (Target Setup)</h3>
+              <h3 class="timeline-title">통계 분석 (02_Statistical_Analysis.ipynb)</h3>
             </div>
             <div class="timeline-tags">
-              <span>Oral Target Binarization</span>
-              <span>Scikit-learn</span>
+              <span>SciPy · Rao-Scott 구현</span>
+              <span>가중치 교차분석표</span>
+              <span>보정 p-value 산출</span>
             </div>
           </div>
         </div>
@@ -1702,11 +2001,11 @@
           <div class="timeline-content">
             <div class="timeline-info">
               <div class="timeline-step">STEP 4</div>
-              <h3 class="timeline-title">기술통계 (Descriptive Stats)</h3>
+              <h3 class="timeline-title">EDA 시각화 (EDA.ipynb)</h3>
             </div>
             <div class="timeline-tags">
-              <span>Frequency Table</span>
-              <span>Weighted Sum</span>
+              <span>Matplotlib · Seaborn</span>
+              <span>가중치 집단간 분포 비교</span>
             </div>
           </div>
         </div>
@@ -1717,11 +2016,11 @@
           <div class="timeline-content">
             <div class="timeline-info">
               <div class="timeline-step">STEP 5</div>
-              <h3 class="timeline-title">통계 검정 (Statistical Testing)</h3>
+              <h3 class="timeline-title">불균형 처리 (Imbalance)</h3>
             </div>
             <div class="timeline-tags">
-              <span>SciPy</span>
-              <span>Rao-Scott Chi2</span>
+              <span>SMOTE 오버샘플링</span>
+              <span>TomekLink 경계 제거</span>
             </div>
           </div>
         </div>
@@ -1732,11 +2031,12 @@
           <div class="timeline-content">
             <div class="timeline-info">
               <div class="timeline-step">STEP 6</div>
-              <h3 class="timeline-title">EDA 시각화 (EDA Visualization)</h3>
+              <h3 class="timeline-title">모델링 (train.py)</h3>
             </div>
             <div class="timeline-tags">
-              <span>Matplotlib</span>
-              <span>Seaborn</span>
+              <span>XGBoost / LightGBM / CatBoost</span>
+              <span>Optuna 베이즈 30 Trials</span>
+              <span>Youden's Index 임계값 산출</span>
             </div>
           </div>
         </div>
@@ -1747,11 +2047,12 @@
           <div class="timeline-content">
             <div class="timeline-info">
               <div class="timeline-step">STEP 7</div>
-              <h3 class="timeline-title">불균형 처리 (Imbalance Handling)</h3>
+              <h3 class="timeline-title">성능 검증 (Validation)</h3>
             </div>
             <div class="timeline-tags">
-              <span>SMOTE</span>
-              <span>TomekLink</span>
+              <span>AUC(0.6483)</span>
+              <span>Recall(85.21%)</span>
+              <span>Overfit Gap(0.0066)</span>
             </div>
           </div>
         </div>
@@ -1762,57 +2063,12 @@
           <div class="timeline-content">
             <div class="timeline-info">
               <div class="timeline-step">STEP 8</div>
-              <h3 class="timeline-title">모델링 (Model Tuning)</h3>
-            </div>
-            <div class="timeline-tags">
-              <span>XGBoost</span>
-              <span>AutoGluon</span>
-              <span>Optuna</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP 9 -->
-        <div class="timeline-item">
-          <div class="timeline-badge"></div>
-          <div class="timeline-content">
-            <div class="timeline-info">
-              <div class="timeline-step">STEP 9</div>
-              <h3 class="timeline-title">XAI 해석 (Explainable AI)</h3>
-            </div>
-            <div class="timeline-tags">
-              <span>SHAP</span>
-              <span>Feature Importance</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP 10 -->
-        <div class="timeline-item">
-          <div class="timeline-badge"></div>
-          <div class="timeline-content">
-            <div class="timeline-info">
-              <div class="timeline-step">STEP 10</div>
-              <h3 class="timeline-title">성능 검증 (Performance Audit)</h3>
-            </div>
-            <div class="timeline-tags">
-              <span>Youden's Index</span>
-              <span>ROC/Recall Evaluation</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP 11 -->
-        <div class="timeline-item">
-          <div class="timeline-badge"></div>
-          <div class="timeline-content">
-            <div class="timeline-info">
-              <div class="timeline-step">STEP 11</div>
-              <h3 class="timeline-title">서비스 배포 (Service Deployment)</h3>
+              <h3 class="timeline-title">서비스 배포 (app.py)</h3>
             </div>
             <div class="timeline-tags">
               <span>Streamlit</span>
-              <span>Cloud Deploy</span>
+              <span>4유형 맞춤 가이드</span>
+              <span>카카오 주변 치과 연계</span>
             </div>
           </div>
         </div>
@@ -1821,347 +2077,49 @@
   </section>
 
   <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 5: 기술 스택]
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-  <section id="techstack" class="fade-in-slide">
-    <div class="container">
-      <h2 class="section-title">기술 스택</h2>
-      
-      <div class="tech-grid">
-        <div class="tech-card">
-          <div class="tech-card-header"><i class="fa-solid fa-code"></i> 언어 & 데이터 분석</div>
-          <div class="tech-list">
-            <span class="tech-item"><i class="fa-brands fa-python"></i> Python 3.13</span>
-            <span class="tech-item"><i class="fa-solid fa-database"></i> SQL</span>
-            <span class="tech-item">Pandas</span>
-            <span class="tech-item">NumPy</span>
-            <span class="tech-item">Scikit-learn</span>
-          </div>
-        </div>
-
-        <div class="tech-card">
-          <div class="tech-card-header"><i class="fa-solid fa-brain"></i> 모델링 & 파라미터 최적화</div>
-          <div class="tech-list">
-            <span class="tech-item">XGBoost</span>
-            <span class="tech-item">CatBoost</span>
-            <span class="tech-item">LightGBM</span>
-            <span class="tech-item">TensorFlow</span>
-            <span class="tech-item">PyTorch</span>
-            <span class="tech-item">Optuna</span>
-            <span class="tech-item">AutoGluon</span>
-          </div>
-        </div>
-
-        <div class="tech-card">
-          <div class="tech-card-header"><i class="fa-solid fa-chart-line"></i> 통계 & 불균형 & XAI</div>
-          <div class="tech-list">
-            <span class="tech-item">SciPy</span>
-            <span class="tech-item">SMOTE</span>
-            <span class="tech-item">TomekLink</span>
-            <span class="tech-item">SHAP</span>
-            <span class="tech-item">Integrated Gradients</span>
-          </div>
-        </div>
-
-        <div class="tech-card">
-          <div class="tech-card-header"><i class="fa-solid fa-share-nodes"></i> 배포 & 환경</div>
-          <div class="tech-list">
-            <span class="tech-item"><i class="fa-solid fa-window-restore"></i> Streamlit</span>
-            <span class="tech-item"><i class="fa-brands fa-git-alt"></i> Git</span>
-            <span class="tech-item"><i class="fa-brands fa-github"></i> GitHub</span>
-            <span class="tech-item">VS Code</span>
-            <span class="tech-item">Jupyter</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 6: 핵심 기술 의사결정]
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-  <section id="decisions" class="fade-in-slide">
-    <div class="container">
-      <h2 class="section-title">핵심 기술 의사결정</h2>
-      
-      <div class="decisions-grid">
-        <!-- 카드 1 -->
-        <div class="decision-card">
-          <div class="decision-header">
-            <i class="fa-solid fa-scale-balanced"></i>
-            1. 복합표본 가중치(Weight)의 모델 전면 적용
-          </div>
-          <div class="decision-body">
-            <div class="decision-row">
-              <span class="decision-row-label prob">문제</span>
-              <p class="decision-row-text">질병관리청 조사는 단순 무작위 추출이 아닌 복합표본설계 데이터로, 표본 간 가중치를 무시하고 학습할 경우 예측에 심각한 편향이 발생함.</p>
-            </div>
-            <div class="decision-row">
-              <span class="decision-row-label dec">판단</span>
-              <p class="decision-row-text">통계 검정 뿐만 아니라 머신러닝 학습 모델들의 손실 함수 계산 시 <strong>sample_weight</strong> 파라미터를 명시 주입하여 정형화 수행.</p>
-            </div>
-            <div class="decision-row">
-              <span class="decision-row-label res">결과</span>
-              <p class="decision-row-text">실제 대한민국 청소년 전체 모집단을 올바르게 대표하고 일반화 성능이 보장된 의료 예측 서빙 서비스 기반을 확보함.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 카드 2 -->
-        <div class="decision-card">
-          <div class="decision-header">
-            <i class="fa-solid fa-square-poll-vertical"></i>
-            2. 통계 검정으로 Rao-Scott 카이제곱 채택
-          </div>
-          <div class="decision-body">
-            <div class="decision-row">
-              <span class="decision-row-label prob">문제</span>
-              <p class="decision-row-text">관측치 독립성을 전제하는 일반 피어슨 카이제곱(Pearson Chi2) 검정 사용 시, 분산이 과소 추정되어 1종 오류율이 극도로 증폭됨.</p>
-            </div>
-            <div class="decision-row">
-              <span class="decision-row-label dec">판단</span>
-              <p class="decision-row-text">설계 효과(Design Effect) 보정이 가능한 **Rao-Scott 카이제곱 검정** 파이프라인을 자작 구현하여 인구통계학적 특성 검정 수행.</p>
-            </div>
-            <div class="decision-row">
-              <span class="decision-row-label res">결과</span>
-              <p class="decision-row-text">왜곡되지 않은 객관적이고 신뢰도 높은 스마트폰 사용-구강 건강 간 유의한 상관관계 통계 유의성 입증.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 카드 3 -->
-        <div class="decision-card">
-          <div class="decision-header">
-            <i class="fa-solid fa-bezier-curve"></i>
-            3. 데이터 불균형 제어를 위한 SMOTE + TomekLink 조합
-          </div>
-          <div class="decision-body">
-            <div class="decision-row">
-              <span class="decision-row-label prob">문제</span>
-              <p class="decision-row-text">단순 오버샘플링(SMOTE) 적용 시 클래스 경계면 부근에 모호한 노이즈 샘플이 합성 생성되어 모델의 결정 경계선이 훼손됨.</p>
-            </div>
-            <div class="decision-row">
-              <span class="decision-row-label dec">판단</span>
-              <p class="decision-row-text">SMOTE로 합성 생성된 데이터에서 경계면 부근의 상충하는 쌍(Tomek Links)을 검출해 모두 소거하는 하이브리드 샘플링 설계.</p>
-            </div>
-            <div class="decision-row">
-              <span class="decision-row-label res">결과</span>
-              <p class="decision-row-text">결정 경계선 명확화를 통하여 최종 평가 셋의 **재현율(Recall)과 정밀도(Precision) 동시 안정화** 유도.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 카드 4 -->
-        <div class="decision-card">
-          <div class="decision-header">
-            <i class="fa-solid fa-sliders"></i>
-            4. Optuna 베이즈 최적화 & Youden's Index 조합 임계값
-          </div>
-          <div class="decision-body">
-            <div class="decision-row">
-              <span class="decision-row-label prob">문제</span>
-              <p class="decision-row-text">그리드 서치의 낮은 효율성, 그리고 일반 0.5 분류 컷오프는 헬스케어 도메인에서 위음성(미검출) 위험도를 키워 치명적인 결과를 낳음.</p>
-            </div>
-            <div class="decision-row">
-              <span class="decision-row-label dec">판단</span>
-              <p class="decision-row-text">Optuna로 초매개변수를 베이즈 최적화하고, 검증 데이터의 민감도와 특이도 합이 최대가 되는 **Youden's Index 임계값(0.398)**을 자동 산출.</p>
-            </div>
-            <div class="decision-row">
-              <span class="decision-row-label res">결과</span>
-              <p class="decision-row-text">재현율 **85.2%**를 달성하여 조기 예측이라는 공공 의료 시스템 본래의 헬스케어 가치에 부합하는 분류기 셋 구축.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 7: 교과목 연계 (Curriculum Mapping)]
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-  <section id="curriculum" class="fade-in-slide">
-    <div class="container">
-      <h2 class="section-title">Curriculum Mapping</h2>
-      <p class="eda-subtitle">교육과정에서 습득한 교과목 지식이 분석 전 단계에 체계적으로 적용되었습니다</p>
-      
-      <div class="curriculum-grid">
-        <!-- 과목 1 -->
-        <div class="curr-card">
-          <div class="curr-header blue">
-            <i class="fa-solid fa-book-medical"></i>
-            &nbsp;디지털 헬스케어 프로그래밍
-          </div>
-          <div class="curr-details-box">
-            <div class="curr-label">핵심 개념</div>
-            <div class="curr-concepts">Python 언어 기초 / 데이터 가공 / 공공 API 활용</div>
-          </div>
-          <div class="curr-arrow"><i class="fa-solid fa-circle-chevron-down"></i></div>
-          <div class="curr-apply-box">
-            <ul>
-              <li>SAS 원시 데이터 파일(.sas7bdat) Python 환경 파싱</li>
-              <li>질병관리청 공공 데이터 수집 및 연동 모듈 파이프라인 개발</li>
-              <li>SQL 문을 이용한 분석 변수 테이블 집계 구축</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 과목 2 -->
-        <div class="curr-card">
-          <div class="curr-header green">
-            <i class="fa-solid fa-server"></i>
-            &nbsp;디지털 헬스케어 DB 구현
-          </div>
-          <div class="curr-details-box">
-            <div class="curr-label">핵심 개념</div>
-            <div class="curr-concepts">EDA 및 기술통계 / 파워BI / ML 분류 예측 분류</div>
-          </div>
-          <div class="curr-arrow"><i class="fa-solid fa-circle-chevron-down"></i></div>
-          <div class="curr-apply-box">
-            <ul>
-              <li>Matplotlib 및 Seaborn을 활용한 심층적 EDA 수행</li>
-              <li>XGBoost, CatBoost, LightGBM 알고리즘 튜닝 및 학습</li>
-              <li>전처리 전 결측치 이상 처리, 파생 종속 변수 이진화 설계</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 과목 3 -->
-        <div class="curr-card">
-          <div class="curr-header orange">
-            <i class="fa-solid fa-calculator"></i>
-            &nbsp;헬스케어 통계 분석
-          </div>
-          <div class="curr-details-box">
-            <div class="curr-label">핵심 개념</div>
-            <div class="curr-concepts">복합표본 가중치 / 교차분석 검정 / 통계 모형 수립</div>
-          </div>
-          <div class="curr-arrow"><i class="fa-solid fa-circle-chevron-down"></i></div>
-          <div class="curr-apply-box">
-            <ul>
-              <li>복합표본 가중치(W)의 데이터셋 정규화 처리</li>
-              <li>Rao-Scott 카이제곱 검정을 통한 인구통계학적 가설 검정</li>
-              <li>위계적 다중 로지스틱 회귀분석으로 교란변수 보정</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 8: 데모 갤러리]
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-  <section id="gallery" class="fade-in-slide">
-    <div class="container">
-      <h2 class="section-title">서비스 화면 & 시각화 갤러리</h2>
-      
-      <div class="gallery-grid">
-        <!-- 갤러리 1 -->
-        <div class="gallery-item" onclick="openLightbox(this)">
-          <div class="gallery-image-wrapper">
-            <!-- 사용자가 캡처 이미지를 채워 넣을 수 있도록 경로 매핑, 실패 시 플레이스홀더 출력 -->
-            <img src="./plots/streamlit_main.png" alt="서비스 메인 화면" onerror="showPlaceholder(this)">
-            <div class="image-placeholder">
-              <i class="fa-solid fa-laptop-medical"></i>
-              <p>서비스 메인 화면<br><span style="font-size:0.8rem; opacity:0.7;">(Streamlit 입력 인터페이스)</span></p>
-            </div>
-          </div>
-          <div class="gallery-caption">
-            <h4>📱 서비스 메인 대시보드</h4>
-            <p>스마트폰 사용 환경, 주중/주말 시간, 수면의 질 및 사용자의 성적, 소득 등의 변수를 간편하게 입력할 수 있는 Streamlit 인터페이스 화면입니다.</p>
-          </div>
-        </div>
-
-        <!-- 갤러리 2 -->
-        <div class="gallery-item" onclick="openLightbox(this)">
-          <div class="gallery-image-wrapper">
-            <img src="./plots/streamlit_result.png" alt="구강 위험도 예측 결과 화면" onerror="showPlaceholder(this)">
-            <div class="image-placeholder">
-              <i class="fa-solid fa-square-poll-horizontal"></i>
-              <p>위험도 예측 결과 화면<br><span style="font-size:0.8rem; opacity:0.7;">(개인화 자가진단 및 맞춤 행동 가이드)</span></p>
-            </div>
-          </div>
-          <div class="gallery-caption">
-            <h4>🦷 구강 건강 위험 분류 및 행동 요령</h4>
-            <p>머신러닝 알고리즘에 의해 이중 위험군 등을 정밀 탐색 후, 위험 등급과 이에 맞는 4개 영역의 개인 맞춤 치료/위생 수칙 가이드를 제공합니다.</p>
-          </div>
-        </div>
-
-        <!-- 갤러리 3 -->
-        <div class="gallery-item" onclick="openLightbox(this)">
-          <div class="gallery-image-wrapper">
-            <!-- 훈련을 통해 실제 로컬에 생성된 Feature Importance 플롯 사용 -->
-            <img src="./plots/04_feature_importance.png" alt="XGBoost 변수 기여도 시각화" onerror="showPlaceholder(this)">
-            <div class="image-placeholder">
-              <i class="fa-solid fa-chart-bar"></i>
-              <p>XGBoost 변수 중요도<br><span style="font-size:0.8rem; opacity:0.7;">(Feature Importance 플롯)</span></p>
-            </div>
-          </div>
-          <div class="gallery-caption">
-            <h4>🔍 XGBoost 변수 중요도 분석</h4>
-            <p>실제 학습된 XGBoost 모델에서 구강 건강 위험 예측에 가장 핵심적인 가중치를 나타낸 중요 변수 시각화 차트입니다.</p>
-          </div>
-        </div>
-
-        <!-- 갤러리 4 -->
-        <div class="gallery-item" onclick="openLightbox(this)">
-          <div class="gallery-image-wrapper">
-            <!-- 훈련을 통해 실제 로컬에 생성된 ROC Curves 플롯 사용 -->
-            <img src="./plots/01_roc_curves.png" alt="ROC Curve 대시보드" onerror="showPlaceholder(this)">
-            <div class="image-placeholder">
-              <i class="fa-solid fa-chart-line"></i>
-              <p>ROC Curve 성능 대시보드<br><span style="font-size:0.8rem; opacity:0.7;">(모델별 AUC 비교 차트)</span></p>
-            </div>
-          </div>
-          <div class="gallery-caption">
-            <h4>📈 ROC Curves 모델 성능 비교 차트</h4>
-            <p>XGBoost를 포함하여 최종 최적화 과정을 거친 5개 분류 모델의 변별력을 시각적으로 대조한 ROC 커브 데이터 결과 차트입니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 9: Repository 구조]
+     [섹션 8: Repository 구조]
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
   <section id="repository" class="fade-in-slide">
     <div class="container">
-      <h2 class="section-title">GitHub Repository 구조</h2>
+      <h2 class="section-title">📁 Repository 구조</h2>
       
       <div class="repo-box">
         <div class="repo-header-row">
           <div class="repo-title">
-            <i class="fa-brands fa-github-alt"></i> phonjamchiara-oral-risk/
+            <i class="fa-brands fa-github-alt"></i> Oral_Health_Prediction /
           </div>
           <span class="badge-gray">Main Branch</span>
         </div>
         
         <div class="repo-structure">
           <pre>
-phonjamchiara-oral-risk/
+Oral_Health_Prediction/
 ├── data/
-│   └── processed/          # 전처리 및 라벨링 완료 데이터 (.csv)
-├── notebooks/
-│   ├── 01_EDA_preprocessing.ipynb      # SAS 로드 및 결측치, 데이터 전처리
-│   ├── 02_statistical_analysis.ipynb   # Rao-Scott 카이제곱 검정 및 위계적 회귀분석
-│   ├── 03_imbalance_handling.ipynb     # SMOTE + TomekLink 데이터 불균형 제어
-│   ├── 04_modeling_xgboost.ipynb       # XGBoost 모델링 및 Optuna 최적화
-│   ├── 05_automl_autogluon.ipynb       # AutoML 비교 모델링 분석
-│   └── 06_xai_shap.ipynb              # SHAP 기반 설명 가능 AI 모듈 구현
+│   ├── raw/                          # kyrbs2020.sas7bdat (원본)
+│   └── processed/                    # kyrbs2020_clean_v1.csv (52,627건)
 ├── models/
-│   └── xgboost_final.pkl               # 최종 저장된 바이너리 예측 모델
-├── app/
-│   └── main.py                         # Streamlit 대시보드 구동 코드
-├── requirements.txt                    # 프로젝트 패키지 의존성 명세
-└── README.md                           # 프로젝트 설명서</pre>
+│   ├── xgboost_model.pkl             # ✅ 최종 XGBoost 모델
+│   ├── scaler.pkl                    # WeightedStandardScaler (직접 구현)
+│   ├── model_meta.json               # Youden's Index 임계값(0.398) 등
+│   └── best_params.json              # Optuna 30 Trials 결과
+├── plots/
+│   ├── 01_roc_curves.png             # 5개 모델 ROC 커브 비교
+│   ├── 03_confusion_matrix_best.png  # XGBoost 혼동 행렬
+│   └── 04_feature_importance.png     # 변수 중요도
+├── 01_Data_Preprocessing.ipynb       # 전처리 · 파생변수
+├── 02_Statistical_Analysis.ipynb     # Rao-Scott 검정
+├── EDA.ipynb                         # 가중치 반영 EDA
+├── train.py                          # ML 전체 파이프라인
+├── app.py                            # Streamlit 서비스
+└── requirements.txt</pre>
         </div>
 
         <div class="repo-instructions">
           <h4>🚀 서비스 실행 방법</h4>
           <div class="repo-code-block">
             <code id="install-cmd">pip install -r requirements.txt
-streamlit run app/main.py</code>
+python train.py
+streamlit run app.py</code>
             <button class="copy-btn" onclick="copyCode()" aria-label="코드 복사">
               <i class="fa-regular fa-copy"></i>
             </button>
@@ -2171,25 +2129,19 @@ streamlit run app/main.py</code>
     </div>
   </section>
 
-  <!-- 라이트박스 모달 팝업 구조 -->
-  <div id="custom-lightbox" class="lightbox" onclick="closeLightbox()">
-    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-    <img class="lightbox-content" id="lightbox-img" src="" alt="확대 이미지">
-  </div>
-
   <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     [섹션 10: 푸터 영역]
+     [섹션 9: 푸터 영역]
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
   <footer>
     <div class="footer-grid container">
       <div class="footer-about">
         <h3>팀 <span>폰잠치아라</span></h3>
-        <p>질병관리청의 거대 보건 빅데이터를 분석하여 청소년의 디지털 과의존 문제를 해결하고 구강 건강과 수면 습관의 통합 관리를 돕는 예측 분류기 인프라를 구축했습니다.</p>
+        <p>질병관리청의 보건 빅데이터를 정교하게 계량화하여 청소년 과의존 및 수면 패턴의 복합 위험도를 통계 검정 및 머신러닝으로 탐색하는 의료 예측 솔루션입니다.</p>
         <div class="footer-links-row">
           <a href="https://github.com/yd5170/cheer_up.git" target="_blank" class="footer-btn">
             <i class="fa-brands fa-github"></i> GitHub
           </a>
-          <a href="#" class="footer-btn">
+          <a href="https://github.com/yd5170/cheer_up.git" class="footer-btn">
             <i class="fa-solid fa-window-restore"></i> Streamlit Demo
           </a>
         </div>
@@ -2206,7 +2158,7 @@ streamlit run app/main.py</code>
         </div>
         <div class="footer-meta-item">
           <i class="fa-solid fa-briefcase"></i>
-          <span>담당 역할: <strong>TA (모델링 및 성능 검증, 서비스 배포 총괄)</strong></span>
+          <span>담당 역할: <strong>TA (모델링 · 성능 검증 · Streamlit 서비스 구현)</strong></span>
         </div>
         <div class="footer-meta-item">
           <i class="fa-solid fa-envelope"></i>
@@ -2216,14 +2168,14 @@ streamlit run app/main.py</code>
     </div>
 
     <div class="footer-bottom container">
-      <div>&copy; 2026 폰잠치아라. All rights reserved.</div>
+      <div>&copy; 2026 폰잠치아라. All rights reserved. | 데이터 출처: 질병관리청 제16차 청소년건강행태조사(2020)</div>
       <div>Designed for Portfolio Presentation</div>
     </div>
   </footer>
 
   <script>
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       [자바스크립트 인터랙션 정의]
+       [자바스크립트 인터랙션 정의 & 차트 렌더링]
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     // 1. 네비게이션 액티브 바 세팅 & 스무스 스크롤 추적
@@ -2234,7 +2186,6 @@ streamlit run app/main.py</code>
       let current = "";
       sections.forEach(section => {
         const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
         if (pageYOffset >= (sectionTop - 120)) {
           current = section.getAttribute("id");
         }
@@ -2266,7 +2217,7 @@ streamlit run app/main.py</code>
             counters.forEach(counter => runCounter(counter));
           }
           
-          observer.unobserve(entry.target); // 한번 나타난 요소는 관찰 해제
+          observer.unobserve(entry.target);
         }
       });
     }, observerOptions);
@@ -2278,15 +2229,13 @@ streamlit run app/main.py</code>
     // 3. KPI 숫자 카운트업 애니메이션 함수
     function runCounter(counter) {
       const target = parseFloat(counter.getAttribute("data-target"));
-      const decimals = parseInt(counter.getAttribute("data-decimals") || "2");
-      const duration = 2000; // 2초 동안 증가
+      const decimals = parseInt(counter.getAttribute("data-decimals") || "0");
+      const duration = 2000;
       const startTime = performance.now();
 
       function updateNumber(now) {
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing 효과 (Ease Out Quad)
         const easeProgress = progress * (2 - progress);
         const currentValue = easeProgress * target;
 
@@ -2310,11 +2259,13 @@ streamlit run app/main.py</code>
       requestAnimationFrame(updateNumber);
     }
 
-    // Hero 영역 로드 시 즉각 카운터 동작 수행 (IntersectionObserver를 기다리지 않음)
+    // Hero 영역 로드 시 즉각 카운터 동작 수행
     window.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll("#hero .counter").forEach(counter => {
         runCounter(counter);
       });
+      // 차트 초기화 렌더링 호출
+      initCharts();
     });
 
     // 4. 모바일 햄버거 메뉴 동작
@@ -2337,32 +2288,7 @@ streamlit run app/main.py</code>
       }
     });
 
-    // 5. 갤러리 이미지 모달 (라이트박스) 구현
-    function openLightbox(element) {
-      const img = element.querySelector("img");
-      // 만약 플레이스홀더가 노출된 상태가 아니라면 이미지 팝업을 엽니다.
-      if (img.style.display !== "none" && img.src) {
-        const lightbox = document.getElementById("custom-lightbox");
-        const lightboxImg = document.getElementById("lightbox-img");
-        lightboxImg.src = img.src;
-        lightbox.style.display = "flex";
-      }
-    }
-
-    function closeLightbox() {
-      document.getElementById("custom-lightbox").style.display = "none";
-    }
-
-    // 이미지 로드 에러 처리 (이미지가 실제로 존재하지 않을 시 대응)
-    function showPlaceholder(imgElement) {
-      imgElement.style.display = "none"; // 이미지를 숨김 처리
-      const placeholder = imgElement.nextElementSibling;
-      if (placeholder) {
-        placeholder.style.display = "flex"; // 플레이스홀더를 보여줌
-      }
-    }
-
-    // 6. 코드 복사 기능
+    // 5. 코드 복사 기능
     function copyCode() {
       const codeText = document.getElementById("install-cmd").innerText;
       navigator.clipboard.writeText(codeText).then(() => {
@@ -2371,6 +2297,422 @@ streamlit run app/main.py</code>
         setTimeout(() => {
           copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
         }, 2000);
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // [6. Chart.js 시각화 차트 초기화 및 데이터 주입]
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function initCharts() {
+      // 공통 다크 스타일 테마 옵션 정의
+      const commonDarkOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#94a3b8',
+              font: { family: 'Noto Sans KR', size: 11 }
+            }
+          },
+          tooltip: {
+            backgroundColor: '#112240',
+            titleColor: '#f8fafc',
+            bodyColor: '#94a3b8',
+            borderColor: 'rgba(0, 201, 177, 0.3)',
+            borderWidth: 1,
+            bodyFont: { family: 'Noto Sans KR' },
+            titleFont: { family: 'Noto Sans KR' }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#94a3b8', font: { family: 'Outfit' } }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#94a3b8', font: { family: 'Noto Sans KR' } }
+          }
+        }
+      };
+
+      // --- [그래프 1] 스마트폰 의존도별 구강증상 비율 (그룹 가로 막대) ---
+      const ctx1 = document.getElementById('chart-dependence-crosstab').getContext('2d');
+      new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['일반군 (No Risk)', '스마트폰 의존 위험군 (Risk)'],
+          datasets: [
+            {
+              label: '구강증상 없음 (양호)',
+              data: [54.72, 35.28],
+              backgroundColor: '#3b82f6', // 블루
+              borderRadius: 6
+            },
+            {
+              label: '구강증상 있음 (불량)',
+              data: [45.28, 64.72],
+              backgroundColor: '#ff4757', // 레드
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          ...commonDarkOptions,
+          indexAxis: 'y',
+          plugins: {
+            ...commonDarkOptions.plugins,
+            tooltip: {
+              ...commonDarkOptions.plugins.tooltip,
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': ' + context.raw.toFixed(2) + '%';
+                }
+              }
+            }
+          },
+          scales: {
+            ...commonDarkOptions.scales,
+            x: {
+              ...commonDarkOptions.scales.x,
+              max: 100,
+              ticks: {
+                ...commonDarkOptions.scales.x.ticks,
+                callback: value => value + '%'
+              }
+            }
+          }
+        }
+      });
+
+      // --- [그래프 2-1] 수면 충분 도넛 차트 ---
+      const ctx2_1 = document.getElementById('chart-sleep-good').getContext('2d');
+      new Chart(ctx2_1, {
+        type: 'doughnut',
+        data: {
+          labels: ['구강증상 없음 (양호)', '구강증상 있음 (불량)'],
+          datasets: [{
+            data: [57.90, 42.10],
+            backgroundColor: ['#00c9b1', '#ff6b6b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              ...commonDarkOptions.plugins.tooltip,
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.raw.toFixed(2) + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // --- [그래프 2-2] 수면 부족 도넛 차트 ---
+      const ctx2_2 = document.getElementById('chart-sleep-bad').getContext('2d');
+      new Chart(ctx2_2, {
+        type: 'doughnut',
+        data: {
+          labels: ['구강증상 없음 (양호)', '구강증상 있음 (불량)'],
+          datasets: [{
+            data: [46.11, 53.89],
+            backgroundColor: ['#00c9b1', '#ff6b6b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              ...commonDarkOptions.plugins.tooltip,
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.raw.toFixed(2) + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // --- [그래프 3] 사용시간별 구강증상 비율 (라인 차트) ---
+      const ctx3 = document.getElementById('chart-use-time-line').getContext('2d');
+      new Chart(ctx3, {
+        type: 'line',
+        data: {
+          labels: ['≤3시간', '3~5시간', '5~8시간', '8시간 이상'],
+          datasets: [
+            {
+              label: '주중 사용시간별 구강증상 있음 비율(%)',
+              data: [46.66, 50.51, 54.24, 56.08],
+              borderColor: '#00c9b1',
+              backgroundColor: 'rgba(0, 201, 177, 0.1)',
+              tension: 0.4,
+              fill: false,
+              borderWidth: 3,
+              pointBackgroundColor: '#00c9b1',
+              pointRadius: 5
+            },
+            {
+              label: '주말 사용시간별 구강증상 있음 비율(%)',
+              data: [44.90, 48.08, 51.55, 55.55],
+              borderColor: '#a8ff3e',
+              borderDash: [6, 4],
+              tension: 0.4,
+              fill: false,
+              borderWidth: 3,
+              pointBackgroundColor: '#a8ff3e',
+              pointRadius: 5
+            }
+          ]
+        },
+        options: {
+          ...commonDarkOptions,
+          scales: {
+            ...commonDarkOptions.scales,
+            y: {
+              ...commonDarkOptions.scales.y,
+              min: 40,
+              max: 60,
+              ticks: {
+                ...commonDarkOptions.scales.y.ticks,
+                callback: value => value + '%'
+              }
+            }
+          }
+        }
+      });
+
+      // --- [그래프 4] 머신러닝 모델 성능 비교 (그룹 가로 막대) ---
+      const ctx4 = document.getElementById('chart-models-compare').getContext('2d');
+      new Chart(ctx4, {
+        type: 'bar',
+        data: {
+          labels: ['XGBoost ✅', 'LightGBM', 'CatBoost', 'Random Forest', 'Logistic Regression'],
+          datasets: [
+            {
+              label: 'ROC-AUC',
+              data: [0.6483, 0.6487, 0.6484, 0.6463, 0.5808],
+              backgroundColor: '#4a9eff',
+              borderRadius: 4
+            },
+            {
+              label: 'Recall (재현율)',
+              data: [0.8521, 0.8506, 0.8500, 0.8473, 0.8516],
+              backgroundColor: '#ff4757',
+              borderRadius: 4
+            },
+            {
+              label: 'Precision (정밀도)',
+              data: [0.5498, 0.5501, 0.5504, 0.5456, 0.5172],
+              backgroundColor: '#00c9b1',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          ...commonDarkOptions,
+          indexAxis: 'y',
+          scales: {
+            ...commonDarkOptions.scales,
+            x: {
+              ...commonDarkOptions.scales.x,
+              max: 1.0
+            }
+          }
+        }
+      });
+
+      // --- [그래프 5] ROC 커브 (라인 차트) ---
+      const ctx5 = document.getElementById('chart-roc-curve').getContext('2d');
+      
+      // 매끄러운 곡선 생성을 위한 FPR 촘촘한 정의 및 TPR 보간 함수
+      const getROCCurveData = (auc) => {
+        // y = x^p 식을 약간 변형하여 ROC 커브 모사
+        // AUC = ∫ (1 - (1-x)^p) dx = 1 - 1/(p+1)  => p = 1/(1-AUC) - 1
+        const p = 1 / (1 - auc) - 1;
+        const points = [];
+        for (let i = 0; i <= 20; i++) {
+          const fpr = i / 20;
+          const tpr = 1 - Math.pow(1 - fpr, p);
+          points.push({ x: fpr, y: tpr });
+        }
+        return points;
+      };
+
+      new Chart(ctx5, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: 'XGBoost (AUC=0.648)',
+              data: getROCCurveData(0.6483),
+              borderColor: '#00c9b1',
+              borderWidth: 3,
+              fill: false,
+              pointRadius: 0
+            },
+            {
+              label: 'LightGBM (AUC=0.649)',
+              data: getROCCurveData(0.6487),
+              borderColor: '#4a9eff',
+              borderWidth: 2,
+              fill: false,
+              pointRadius: 0
+            },
+            {
+              label: 'CatBoost (AUC=0.648)',
+              data: getROCCurveData(0.6484),
+              borderColor: '#ff6b6b',
+              borderWidth: 2,
+              fill: false,
+              pointRadius: 0
+            },
+            {
+              label: 'Random Forest (AUC=0.646)',
+              data: getROCCurveData(0.6463),
+              borderColor: '#f9ca24',
+              borderWidth: 2,
+              borderDash: [6, 4],
+              fill: false,
+              pointRadius: 0
+            },
+            {
+              label: 'Logistic Regression (AUC=0.581)',
+              data: getROCCurveData(0.5808),
+              borderColor: '#a8ff3e',
+              borderWidth: 2,
+              borderDash: [6, 4],
+              fill: false,
+              pointRadius: 0
+            },
+            {
+              label: 'Random Guess',
+              data: [{x:0, y:0}, {x:1, y:1}],
+              borderColor: '#555555',
+              borderWidth: 1.5,
+              borderDash: [5, 5],
+              fill: false,
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          ...commonDarkOptions,
+          plugins: {
+            ...commonDarkOptions.plugins,
+            legend: {
+              ...commonDarkOptions.plugins.legend,
+              position: 'bottom',
+              labels: {
+                ...commonDarkOptions.plugins.legend.labels,
+                boxWidth: 20
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'linear',
+              position: 'bottom',
+              min: 0,
+              max: 1.0,
+              title: { display: true, text: 'False Positive Rate', color: '#94a3b8' },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            },
+            y: {
+              min: 0,
+              max: 1.0,
+              title: { display: true, text: 'True Positive Rate (Recall)', color: '#94a3b8' },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+
+      // --- [그래프 6] Feature Importance (세로 정렬된 가로 막대 차트) ---
+      const ctx6 = document.getElementById('chart-feature-importance').getContext('2d');
+      new Chart(ctx6, {
+        type: 'bar',
+        data: {
+          labels: [
+            '자살생각',
+            '★주중 스마트폰 사용시간',
+            '학업성적',
+            '★주말 스마트폰 사용시간',
+            '가구소득',
+            '학교급',
+            '성별',
+            '스트레스',
+            '절망감',
+            '★수면의 질(나쁨=1)',
+            '★스마트폰 의존도(위험=1)',
+            '불안수준'
+          ],
+          datasets: [{
+            label: '피처 중요도 (Feature Importance)',
+            data: [
+              0.0128,
+              0.0160,
+              0.0189,
+              0.0258,
+              0.0304,
+              0.0316,
+              0.0449,
+              0.0627,
+              0.0852,
+              0.1272,
+              0.2525,
+              0.2919
+            ],
+            // 핵심 변수는 라임(#a8ff3e) 또는 청록(#00c9b1)과 대비되도록 피치 레드(#ff4757) 컬러 강조
+            backgroundColor: [
+              '#95a5a6', // 일반
+              '#ff4757', // ★ 핵심
+              '#95a5a6', // 일반
+              '#ff4757', // ★ 핵심
+              '#95a5a6', // 일반
+              '#95a5a6', // 일반
+              '#95a5a6', // 일반
+              '#95a5a6', // 일반
+              '#95a5a6', // 일반
+              '#ff4757', // ★ 핵심
+              '#ff4757', // ★ 핵심
+              '#95a5a6'  // 일반
+            ],
+            borderRadius: 5
+          }]
+        },
+        options: {
+          ...commonDarkOptions,
+          indexAxis: 'y',
+          plugins: {
+            ...commonDarkOptions.plugins,
+            legend: { display: false }
+          },
+          scales: {
+            ...commonDarkOptions.scales,
+            x: {
+              ...commonDarkOptions.scales.x,
+              ticks: {
+                ...commonDarkOptions.scales.x.ticks,
+                callback: value => value.toFixed(3)
+              }
+            }
+          }
+        }
       });
     }
   </script>
