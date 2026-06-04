@@ -229,7 +229,6 @@ KYRBS 2020 SAS 원시 데이터에서 주요 변수를 추출하고 분석에 �
    - 인구통계학적 배경 (성별, 학교급, 학업성적, 경제수준)과 수면의 질, 스마트폰 주중/주말 사용 시간 및 S-Scale 10대 질문 문항을 편리하게 수집합니다.
    - 입력 직후 XGBoost 모델이 결과를 연산하여 의존도 유형 및 구강 건강 위험 확률을 반환합니다.
    <p align="center">
-     <img src="images/streamlit_images/image%20(27).png" width="49%" alt="구강 예측 입력 화면" />
      <img src="images/streamlit_images/image%20(29).png" width="49%" alt="AI 분석 결과 화면" />
    </p>
 
