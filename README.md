@@ -8,13 +8,13 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![XGBoost](https://img.shields.io/badge/XGBoost-Final_Model-FF6600?style=for-the-badge)](https://xgboost.readthedocs.io)
-[![Streamlit](https://img.shields.io/badge/Streamlit-Deployed-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Local_App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
 [![Statsmodels](https://img.shields.io/badge/Statsmodels-Statistical_Analysis-blue?style=for-the-badge)](https://www.statsmodels.org)
 [![Optuna](https://img.shields.io/badge/HPO-Optuna-00B2E2?style=for-the-badge)](https://optuna.org)
 
 <br>
 
-[📊 Streamlit Demo](https://github.com/yd5170/cheer_up.git) · [📁 데이터 출처](https://www.kdca.go.kr/yhs/)
+[📁 데이터 출처](https://www.kdca.go.kr/yhs/)
 
 </div>
 
