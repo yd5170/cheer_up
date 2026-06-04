@@ -27,7 +27,7 @@
 > **"스마트폰 과의존과 수면 부족이 청소년 구강 건강을 얼마나 위협하는가?"**
 > **2020 청소년 건강행태 온라인조사(KYRBS)** 데이터를 기반으로 청소년의 스마트폰 의존도·수면이 구강 건강에 미치는 영향을 분석하고, 머신러닝 분류 모델 (Machine Learning Classification Model)로 구강 건강 불량 위험군을 예측하는 프로젝트입니다.
 
-<img width="1067" height="652" alt="image" src="https://github.com/user-attachments/assets/bb19980a-d402-47d0-9128-576b3d3349c8" />
+<img width="1516" height="691" alt="ChatGPT Image 2026년 6월 5일 오전 02_03_48 - 복사본" src="https://github.com/user-attachments/assets/f6838ded-9ff8-49f5-bd7f-12ad1aed6aaf" />
 
 | 항목 | 내용 |
 |------|------|
