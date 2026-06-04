@@ -117,15 +117,15 @@ KYRBS 2020 SAS 원시 데이터에서 주요 변수를 추출하고 분석에 �
 | 변수 (Variable) | 원시 코드 (Raw Code) | 변환 기준 (Mapping Rule) |
 |------|-----------|-----------|
 | `gender` (성별) | SEX | 1 → Male (남학생) / 2 → Female (여학생) |
-| `school` (학교급) | GRADE | 1~3 → Middle school (중학교) / 4~6 → High school (고등학교) |
-| `grade` (성적수준) | E_S_RCRD | 1~2 → High (상) / 3 → Middle (중) / 4~5 → Low (하) |
-| `income` (경제수준) | E_SES | 1~2 → High (상) / 3 → Middle (중) / 4~5 → Low (하) |
-| `smartphone_use_day/weekend`<br>(스마트폰 사용시간) | INT_SPWD_TM<br>INT_SPWK_TM | 분 단위 수치를 시간 단위로 환산 후 4구간 범주화<br>(≤3시간 / 3~5시간 / 5~8시간 / ≥8시간) |
-| `smartphone_dependence`<br>(스마트폰 의존도) | INT_SP_OU_1~10 | 한국지능정보사회진흥원(NIA) S-Scale 10개 문항 점수 합산<br>- 23점 미만 → No (일반군)<br>- 23점 이상 → Risk (위험군) |
-| `anxiety` (불안) | M_GAD_1~7 | GAD-7 7개 문항 점수 합산 (각 문항 0~3점 변환)<br>0~4 → No / 5~9 → Mild / 10~14 → Moderate / 15~ → Severe |
-| `stress` (스트레스) | M_STR | 1~2 → High (상) / 3 → Middle (중) / 4~5 → Low (하) |
-| `sleep_quality` (수면의 질) | M_SLP_EN | 주관적 피로 회복 정도<br>1~2 → No (충분/양호) / 3~5 → Yes (부족/문제) |
-| **`oral_health` (타겟 변수)** | O_SYMP1~4 | 치아 파절, chewing discomfort(씹기 불편), 치아 통증, 잇몸 출혈 증상 중 1개 이상 경험 시 → Yes (1) / 없음 → No (0) |
+| `school` (학교급) | GRADE | 1\~3 → Middle school (중학교) / 4\~6 → High school (고등학교) |
+| `grade` (성적수준) | E_S_RCRD | 1\~2 → High (상) / 3 → Middle (중) / 4\~5 → Low (하) |
+| `income` (경제수준) | E_SES | 1\~2 → High (상) / 3 → Middle (중) / 4\~5 → Low (하) |
+| `smartphone_use_day/weekend`<br>(스마트폰 사용시간) | INT_SPWD_TM<br>INT_SPWK_TM | 분 단위 수치를 시간 단위로 환산 후 4구간 범주화<br>(≤3시간 / 3\~5시간 / 5\~8시간 / ≥8시간) |
+| `smartphone_dependence`<br>(스마트폰 의존도) | INT_SP_OU_1\~10 | 한국지능정보사회진흥원(NIA) S-Scale 10개 문항 점수 합산<br>- 23점 미만 → No (일반군)<br>- 23점 이상 → Risk (위험군) |
+| `anxiety` (불안) | M_GAD_1\~7 | GAD-7 7개 문항 점수 합산 (각 문항 0\~3점 변환)<br>0\~4 → No / 5\~9 → Mild / 10\~14 → Moderate / 15\~ → Severe |
+| `stress` (스트레스) | M_STR | 1\~2 → High (상) / 3 → Middle (중) / 4\~5 → Low (하) |
+| `sleep_quality` (수면의 질) | M_SLP_EN | 주관적 피로 회복 정도<br>1\~2 → No (충분/양호) / 3\~5 → Yes (부족/문제) |
+| **`oral_health` (타겟 변수)** | O_SYMP1\~4 | 치아 파절, chewing discomfort(씹기 불편), 치아 통증, 잇몸 출혈 증상 중 1개 이상 경험 시 → Yes (1) / 없음 → No (0) |
 
 > 📌 **결측치 처리**: 리스트와이즈 삭제 (Listwise Deletion) 적용 ➡️ 최종 분석 대상 **50,975명** (선행 연구 논문과 동일한 표본 수치 확보)
 
