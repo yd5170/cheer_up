@@ -146,7 +146,7 @@ def load_and_map_data(uploaded_file=None) -> pd.DataFrame:
     df_vis = df.copy()
     
     map_dep = {"No": "일반군", "Risk": "위험군"}
-    map_oral = {"No": "없음", "Yes": "있음"}
+    map_oral = {0: "없음", 1: "있음", 2: "있음", 3: "있음", 4: "있음"}
     map_sleep = {"No": "충분", "Yes": "부족"}
     map_time = {"≤3": "3시간 이하", "3 ~ 5": "3~5시간", "5 ~ 8": "5~8시간", "≥8": "8시간 이상"}
     
