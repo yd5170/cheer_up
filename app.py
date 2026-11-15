@@ -25,8 +25,9 @@ st.set_page_config(
 # ==========================================
 # 2. 전역 변수 및 통합 경로 설정
 # ==========================================
-DATA_PATH = Path("./data/processed/kyrbs2020_clean_v1.csv")
-MODELS_DIR = Path("./models")
+BASE_DIR = Path(__file__).resolve().parent
+DATA_PATH = BASE_DIR / "data" / "kyrbs2020_clean_v1.csv"
+MODELS_DIR = BASE_DIR / "models"
 
 APP_TITLE = "Cheer up(치아 업)Clinic"
 APP_SUBTITLE = "청소년 스마트폰 의존과 수면의 질에 따른 구강 건강 위험도 예측 모델 개발 및 개인 맞춤형 솔루션"
