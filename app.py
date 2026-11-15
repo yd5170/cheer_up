@@ -151,7 +151,7 @@ def load_and_map_data(uploaded_file=None) -> pd.DataFrame:
     map_time = {"≤3": "3시간 이하", "3 ~ 5": "3~5시간", "5 ~ 8": "5~8시간", "≥8": "8시간 이상"}
     
     df_vis["스마트폰 의존"] = df_vis["smartphone_dependence"].map(map_dep)
-    df_vis["구강 증상"] = df_vis["oral_health"].map(map_oral)
+    df_vis["구강 증상"] = df_vis["oral_health_score"].map(map_oral)
     df_vis["수면 상태"] = df_vis["sleep_quality"].map(map_sleep)
     df_vis["주중 스마트폰 사용"] = df_vis["smartphone_use_day"].map(map_time)
     df_vis["주말 스마트폰 사용"] = df_vis["smartphone_use_weekend"].map(map_time)
